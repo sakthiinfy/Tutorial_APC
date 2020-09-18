@@ -1,9 +1,9 @@
-# Model Predictive Control
-TU Berlin, IoT for Smart Buildings
+# Advanced Process Control
+TU Dortmund, Process Automation Systmems
 
 ## Exercise Materials
 
-This is the repository of the exercise material for the TU Berlin class MPC.
+This is the repository of the exercise material for the TU Dortmund class Process automation systems.
 
 The repository can be cloned to run the Jupyter Notbooks locally.
 **Note the requirements!**
