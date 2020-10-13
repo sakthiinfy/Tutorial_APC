@@ -1,0 +1,41 @@
+def discrete_EKF_filter(x0_initguess, P0, Q, R, x0,  parameters, integeration_step, endtime):
+    
+    # Generate plant measurements
+    t_meas, plant_measurement, plant_state = simulate_plant_measurement(x0, parameters, integeration_step, endtime, R)
+
+    # Get the discretized observer model from python function discrete_observer_model()
+    x_k, x_k1, A_k = discrete_observer_model(parameters, integeration_step)
+
+    
+    # Current time instant
+    t_est = 0;
+    # Initial guess for the observer states becomes the current state estimate
+    x = x0_initguess; 
+    # Initial error covariance becomes the current covariance estimate
+    P = P0; 
+
+    # An array of variables to save the plant states, measurements and time points
+    obs_state = np.zeros((len(t_meas),len(x)));
+    obs_meas = np.zeros((len(t_meas),plant_measurement.shape[1]));
+    obs_time = np.zeros(len(t_meas));
+
+    # 
+    for j in range(len(obs_time)):
+        # Measurement update / Correction
+        K = mtimes(P, mtimes(C.T, inv(mtimes(C, mtimes(P, C.T)) + R)));
+        x = x + mtimes(K, (plant_measurement[j,:].T - mtimes(C,x)));  # x[k|k]
+        P = mtimes(np.eye(4)- mtimes(K, C), P);   # P[k|k]
+
+        # Save the state values at t = t_meas
+        obs_meas[j,:] = np.squeeze(mtimes(C, x));
+        obs_state[j,:] = np.squeeze(x);
+        obs_time[j] = t_est;
+
+        # Time update / Prediction
+        x = DM(substitute(x_k1, x_k, x))    # x[k+1|k]
+        A = DM(substitute(A_k, x_k, x))
+        P = mtimes(A, mtimes(P, A.T)) + Q;  # P[k+1|k]
+        
+        t_est = t_est + integeration_step; 
+
+    return t_meas, plant_state, plant_measurement, obs_time, obs_state, obs_meas  

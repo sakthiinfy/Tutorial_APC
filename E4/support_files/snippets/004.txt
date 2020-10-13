@@ -1,0 +1,26 @@
+def plant_model(parameters):
+    # Extract the plant parameters from the input dictionary
+    kAB = parameters['kAB']; 
+    kBC = parameters['kBC'];
+    kCB = parameters['kCB'];
+    Vdot = parameters['Vdot'];
+    VR = parameters['VR'];
+    cAin = parameters['cAin'];
+    
+    # Generate state variable as symbolic variables
+    cA = SX.sym("cA")
+    cB = SX.sym("cB")
+    cC = SX.sym("cC")
+
+    # Concatenate the symbolic variables to form a state vector
+    x = vertcat(cA,cB,cC)
+    
+    # Generate the differential experssion based on the equations given in the questions
+    dcA = Vdot/VR*(cAin - cA) - kAB*cA;
+    dcB = -Vdot/VR * cB + kAB*cA + kCB*cC - kBC*cB**2;
+    dcC = -Vdot/VR * cC + kBC*cB**2 - kCB*cC;
+
+    # Concatenate the differential expressions
+    dx = vertcat(dcA, dcB, dcC)
+    
+    return x, dx

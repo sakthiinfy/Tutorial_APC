@@ -1,0 +1,30 @@
+def continuous_observer_model(parameters):
+    # Extract the plant parameters from the input dictionary
+    kBC = parameters['kBC'];
+    kCB = parameters['kCB'];
+    Vdot = parameters['Vdot'];
+    VR = parameters['VR'];
+    cAin = parameters['cAin'];
+
+    # Generate state variable as symbolic variables
+    cA = SX.sym("cA")
+    cB = SX.sym("cB")
+    cC = SX.sym("cC")
+    kAB = SX.sym("kAB");
+
+    # Concatenate the symbolic variables to form a state vector
+    x = vertcat(cA,cB,cC,kAB)
+
+    # Give the differential equation of the observer model
+    dcA = Vdot/VR*(cAin - cA) - kAB*cA;
+    dcB = -Vdot/VR * cB + kAB*cA + kCB*cC - kBC*cB**2;
+    dcC = -Vdot/VR * cC + kBC*cB**2 - kCB*cC;
+    dkAB = 0
+
+    # Concatenate the differential expressions
+    dx = vertcat(dcA, dcB, dcC, dkAB)
+
+    # Linearized system matrix of the nonlinear observer model
+    A = jacobian(dx, x)
+
+    return x, dx, A

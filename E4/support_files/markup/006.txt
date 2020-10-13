@@ -1,0 +1,8 @@
+To reduce the number of adjustable parameters it is suitable to chose $\mathbf{P}_0$ to be dependent
+on $\mathbf{Q}$.
+
+As you can see the tuning is quite good as the observer converges quickly to the real state values.
+Thereby the convergence might also be achieved by even smaller entries of $\mathbf{Q}$, but
+the error dynamic would not be that fast. On the other hand, greater entries of $\mathbf{Q}$
+lead to faster observer reactions by which the measurement noise gets amplified
+and the state trajectories are fluctuating around their values.

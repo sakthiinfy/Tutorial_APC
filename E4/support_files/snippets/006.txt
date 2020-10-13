@@ -1,0 +1,28 @@
+# Endtime
+endtime = 10;
+
+# Simulation step width
+integeration_step  = 0.1;               
+
+# Measurment Noise covariance matrix as casadi DM Variable
+R = DM([[0.0001, 0.], [0., 0.0001]]);
+        
+# Call the python function to generate the plant measurements
+t_meas, plant_measurement, plant_state = simulate_plant_measurement(x0, parameters, integeration_step, endtime, R)
+
+# Plot the plant measurments 
+display(Markdown('Plant Measurements:'))
+plt.figure()
+plt.ion()
+plt.subplot(211)
+plt.plot(t_meas,plant_measurement[:,0], 'gx')
+plt.ylim([0., 0.45])
+plt.xlim([0., endtime])
+plt.ylabel('cB')
+plt.subplot(212)
+plt.plot(t_meas,plant_measurement[:,1], 'gx')
+plt.ylim([0., 0.45])
+plt.xlim([0., endtime])
+plt.ylabel('cC')
+plt.xlabel('Time ')
+plt.show()

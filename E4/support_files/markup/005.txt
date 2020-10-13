@@ -1,0 +1,9 @@
+- The obvious difference between a MHE and an EKF is that constraints can be imposed directly in optimization based state estimators. 
+
+- The MHE uses the full nonlinear model which leads to a better stability behavior of the estimator. 
+
+- The implementation of a MHE requires high effort and its computational cost is also very high. 
+
+- The EKF has a simple implementation hence a low computational cost. 
+
+- A good compromise between both estimators is a CEKF as the implementation effort is comparable with an EKF but still has the advantage that constraints can be used.

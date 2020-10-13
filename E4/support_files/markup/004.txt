@@ -1,0 +1,3 @@
+<img src="./support_files/figures/ELO_new.png" style="width: 38%;" align="center"/> 
+
+where $L(\hat{x},u)$ is chosen such that the linearized closed-loop has fixed eigenvalues.

@@ -1,0 +1,28 @@
+# Endtime
+endtime = 400;
+
+# Simulation step width
+integeration_step  = 0.1;    
+
+# Observer Initial Condition
+x0_initguess = np.array([0.1,0.1,0.1,0.1]);
+
+# Covariance Matrix of measurement noise
+R_obsv = np.diag([0.01**2,0.01**2]);
+
+# Covariance Matrix of plant noise
+q1 = 1e-7;
+q2 = 1e-7;
+q3 = 1e-7;
+q4 = 1e-7;
+
+# Covariance matrix of the state noise
+Q = np.diag([q1,q2,q3,q4]);
+
+# Covariance Matrix of initial error
+P0 = Q*200;
+
+# Call the 
+[t_meas, plant_state, plant_measurement, obs_time_discrete, obs_state_discrete, obs_meas_discrete] = discrete_EKF_filter(x0_initguess, P0, Q, R, x0, parameters, integeration_step, endtime)
+
+plot_observer_result('Discrete Extended Kalaman Filter', parameters, t_meas, plant_state, plant_measurement, obs_time_discrete, obs_state_discrete)

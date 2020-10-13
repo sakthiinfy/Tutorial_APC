@@ -1,0 +1,69 @@
+def continuous_EKF_filter(x0_initguess, P0, Q, R, x0,  parameters, integeration_step, endtime):
+    # Generate plant measurements
+    t_meas, plant_measurement, plant_state = simulate_plant_measurement(x0, parameters, integeration_step, endtime, R)
+
+    # Get the continuous observer model from python function continuous_observer_model()
+    x, dx, A_k = continuous_observer_model(parameters)
+
+    # Prepare the integerator to obtain the next state estimate along with the parameter covariance matrix
+    nx = 4 # number of states
+    # Casadi variable that determines the state of the estimation error covariance matrix
+    P = SX.sym("P", nx, nx)
+    # Differential expression for estimation error covariance matrix (Obtained using Matrix Ricatti equations)
+    dP = mtimes(A_k, P) + mtimes(P, A_k.T) + Q
+
+    # Concatenate the observer state with the parameter error covariance matrix state
+    xP = vertcat(x, P.reshape((nx*nx,1))) 
+    
+    # Concatenate the differential equation of the observer state and the parameter covariance matrix state
+    dxP = vertcat(dx, dP.reshape((nx*nx,1))) 
+
+    # Create a dictionary variable to be sent to the integerator() function
+    ode = {'x':xP, 'ode':dxP}
+    
+    # Create a dictionary variable to set options for the integerator() function
+    # Note: Here you need to integerate only until the next measurement sampling point
+    opts = {"abstol": 1e-10, "reltol": 1e-10,'tf': integeration_step}
+
+    # Integerator to obtain the state estimates and the paraemter co-variance matrix
+    EKF_simulator = integrator("EKF", 'cvodes', ode, opts)
+
+    # Current time instant
+    t_est = 0;
+    # Initial guess for the observer states becomes the current state estimate
+    x = x0_initguess; 
+    # Initial error covariance becomes the current covariance estimate
+    P = P0;
+
+    # An array of variables to save the plant states, measurements and time points
+    obs_state = np.zeros((len(t_meas),len(x)));
+    obs_meas = np.zeros((len(t_meas),plant_measurement.shape[1]));
+    obs_time = np.zeros(len(t_meas));
+
+    # The algorithm should be implemented in a loop to obtain a state estimate based on the observed measurements
+    for j in range(len(obs_time)):
+        # Measurement update / Correction
+        # Kalman gain
+        K = mtimes(P, mtimes(C.T, inv(mtimes(C, mtimes(P, C.T)) + R)));
+        # Posteriori state estimate
+        x = x + mtimes(K, (plant_measurement[j,:].T - mtimes(C,x)));  # x[k|k]
+        # Posteriori estimation error covariance estimate
+        P = mtimes(np.eye(nx)- mtimes(K, C), P);   # P[k|k]
+
+        # Save the state values at t = t_meas
+        obs_meas[j,:] = np.squeeze(mtimes(C, x));
+        obs_state[j,:] = np.squeeze(x);
+        obs_time[j] = t_est;
+
+        # Time update / Prediction
+        # Call the integerator to obtain a-priori estimate
+        result = EKF_simulator(x0=vertcat(x, P.reshape((nx*nx,1))))
+        # A-priori state estimate (Reshape to vector of nx*1)
+        x = result['xf'][:nx]       # x[k+1|k]
+        # A-priori error covariance matrix estimate (Reshape to matrix of nx*nx)
+        P = result['xf'][nx:].reshape((nx,nx))       # P[k+1|k]
+        
+        # Increase the time point based on the integeration_step
+        t_est = t_est + integeration_step; 
+
+    return t_meas, plant_state, plant_measurement, obs_time, obs_state, obs_meas 

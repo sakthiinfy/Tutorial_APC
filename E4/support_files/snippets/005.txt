@@ -1,0 +1,39 @@
+def simulate_plant_measurement(x0, parameters, integeration_step, endtime, R):
+    # Call the plant model function to obtain the state symbolic variable and the differential equations
+    x, dx = plant_model(parameters)
+
+    
+    # Dictionary variable which contains the state variable and differential variable to be sent to the integerator
+    ode = {'x':x, 'ode':dx}
+    
+    # Create a time using np.linspace to obtain the time grid for which plant states should be simulated
+    t_meas  = np.linspace(0, endtime, int(endtime/integeration_step)+1)
+
+    # Casadi integerateor Integerator (Use "cvodes" for ODE and "idas" for DAE)
+    # Integerator options
+    opts = {"abstol": 1e-10, "reltol": 1e-10,'grid': t_meas}
+    
+    # Setup the integerator
+    plant_simulator = integrator("plant", 'cvodes', ode, opts)
+    
+    # Call the integerator
+    result = plant_simulator(x0=x0)
+    
+    # Extract the plant states from the integerator results and add the intial condition to the extracted states-
+    plant_state = vertcat(x0.T, result['xf'].T)
+
+    # Extract only the measurement vector from the states
+    plant_measurement = result['xf'][1:3,:].T
+    
+    # Add the initial plant measurements to the simulated plant measurements
+    plant_measurement = vertcat(x0[1:3].T, plant_measurement)
+
+    # Generate random variables to simulate measurement noise
+    np.random.seed(10) # To generate the same plant measurement everytime when you run the code. Remove this line if you want new measurements to ge be generated.
+    meas_error = np.random.randn(plant_measurement.shape[0], plant_measurement.shape[1]) # Generates gaussian measurement noise
+    meas_error = mtimes(meas_error, sqrt(R)) # Scale the measurement noise according to the measurement covariance matrix
+
+    # Add measurement noise to the plant measurements
+    plant_measurement = plant_measurement + meas_error;
+
+    return t_meas, plant_measurement, plant_state

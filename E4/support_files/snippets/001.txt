@@ -1,0 +1,8 @@
+# display, Markdown from Python.display
+from IPython.display import display, Markdown
+# Import everything (*) from casadi
+from casadi import *
+# import matplotlib for plotting:
+import matplotlib.pyplot as plt
+# And numpy to perform matrix and array opearations
+import numpy as np

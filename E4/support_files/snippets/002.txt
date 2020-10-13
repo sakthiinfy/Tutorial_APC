@@ -1,0 +1,10 @@
+# Plant parameters
+kAB =0.4;
+kBC =3.0;
+kCB =2.0;
+Vdot =1.0;
+VR =10.0;
+cAin = 1.0;
+
+# Dictionary variables which contains all the parameters
+parameters = {'kAB':kAB, 'kBC':kBC, 'kCB':kCB, 'Vdot':Vdot, 'VR':VR, 'cAin':cAin}

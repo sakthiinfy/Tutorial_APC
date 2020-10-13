@@ -1,0 +1,99 @@
+The nonlinear dynamic system is given by
+$$\dot{x}=f(x,u),$$
+and the measurement equation 
+$$y = h(x),$$
+We assume that the number of measurements is less than the number of states
+$$\text{dim}(y) = m < n = \text{dim}(x)$$
+Then the task of a state estimator is to identify $x(t)$ from $y(t)$ with the following conditions:
+
+<u>Simulation condition:</u>
+
+if $\hat{x}(0) = x(0)$, then $\hat{x}(t) = x(t) \forall t > t_{0}$
+
+<u>Convergence condition:</u>
+$$^{lim}_{t\rightarrow\infty}(\hat{x}(t)-x(t)) = 0$$
+
+So the general estimator has the form: 
+$$\dot{\hat{x}} = L(\hat{x},u,y)$$
+The goal is now to design the equation above such that the simulation and convergence criteria are fulfilled.
+
+The five options that are discussed in the lectures are:
+
+<strong>Fixed gain observer</strong>
+
+L is a constant feedback. Then is follows:
+$$\dot{e} = f(x,u)-f(\hat{x},u)-L(y-h(\hat{x}))$$
+and after linearization around a steady state
+$$\dot{e} = (A(x_{s})-L\cdot C(x_{s}))\cdot e$$
+
+Compute $L$ by eigenvalue assignment.
+
+<strong> Gain scheduling observer </strong>
+
+The idea is to adapt the observer to the actual state 
+$$L = L(\hat{x})$$
+Compute $L$ dynamically by eigenvalue assignment for different values of $\hat{x}$.
+
+<strong> Extended Kalman filter </strong>
+
+The system includes Gaussian white system $(\xi(t))$ and measurement $(\varphi(t))$ noise, and the covariances are $Q$ and $R$. Then the estimator has the form:
+$$\dot{\hat{x}} = f(\hat{x},u) + L(t)(y-h(\hat{x}))$$
+with $L(t) = P(t)C^{T}R^{-1}$.
+
+The propagation of $\dot{P}$ is calculated according to the Matrix-Riccati-Equation.
+
+<strong> Moving Horizon Estimator </strong>
+
+A Moving Horizon Estimator (MHE) is the further development of a Batch Least Squares Estimator (BLS). The BLS tries to find the best trajectory that brings the system model and all available measurement information inline. It formulates the state estimation problem as a least squares minimization problem over the time $t_0$ until the present time $t_k$ <em>(full information problem)</em>. As every new measurement increases the size of the optimization problem, for the practical application the BLS cannot be used.
+
+The formulation of Batch Least Squares Estimator optimization problem reads as
+$$ \min_{\hat{\xi}_{0,k},\dots,\hat{\xi}_{k-1,k},\hat{\varphi}_{1,k},\dots,\hat{\varphi}_{k,k}} \hat{\xi}_{0,k}^TP^{-1}_{0}\hat{\xi}_{0,k} + \sum\limits_{j=1}^{k-1} \hat{\xi}_{j,k}^TQ^{-1}\hat{\xi}_{j,k} +\sum\limits_{j=1}^{j=k}\hat{\varphi}_{j,k}^TR^{-1}\hat{\varphi}_{j,k}$$
+subject to:
+\begin{align}
+\hat{x}_{0,k} &=  \hat{x}_{0,0} + \hat{\xi}_{0,k} \\
+\hat{x}_{j,k} &=  F(\hat{x}_{j-1,k},u_{j-1})+ \hat{\xi}_{j,k}\quad j= \{ 1, \ldots,  k-1 \} \\
+y_{j} &= h(\hat{x}_{j,k})+\hat{\varphi}_{j,k} \quad j= \{1, \ldots, k \} 
+\end{align}
+
+The MHE is a recursive formulation of the BLS on a moving horizon. It formulates the state estimation problem as a least squares minimization problem over the time on a moving horizon fashion so that the size of the optimization problem is limited. The horizon length is $N$ and the number of measurements used is $N+1$. $\hat{x}_{j,k}$ is the estimation of the state vector at time $t_j$ using measurements up to $t=t_k$. $P_{k-N}$, $Q$ and $R$ are weighting matrices of the estimation, model and measurement error respectively.
+
+The formulation of Moving Horizon Estimator optimization problem reads as:    
+\begin{align}
+\underset{\hat{\xi}_{k-N-1,k},\dots,\hat{\xi}_{k-1,k},\hat{\varphi}_{k-N,k}\dots\hat{\varphi}_{k,k}} {\text{min}} \quad \Psi_k^N &= \hat{\xi}_{k-N-1,k}^TP^{-1}_{k-N}\hat{\xi}_{k-N-1,k} + \sum\limits_{j=k-N}^{k-1}\hat{\xi}_{j,k}^TQ^{-1}\hat{\xi}_{j,k}+ \sum\limits_{j=k-N}^{j=k}\hat{\varphi}_{j,k}^TR^{-1}\hat{\varphi}_{j,k}\\\nonumber
+\end{align}
+subject to:
+\begin{align}
+ \hat{x}_{j+1,k} &=  F(\hat{x}_{j,k},u_j)+ \hat{\xi}_{j,k}\quad j=k-N\ldots k-1\\\nonumber
+\hat{x}_{k-N,k} &= \hat{x}_{k-N,k-N-1}+\hat{\xi}_{k-N-1,k} \\\nonumber
+y_{j} &= h(\hat{x}_{j,k})+\hat{\varphi}_{j,k} \quad j=k-N\ldots k \\\nonumber
+\xi_{\text{min}} &\leq  \hat{\xi}_{k-1|k} \leq \xi_{\text{max}} \\\nonumber
+{\varphi}_{\text{min}} &\leq  \hat{\varphi}_{k|k} \leq \varphi_{\text{max}} \\\nonumber
+x_{\text{min}} &\leq  \hat{x}_{k|k} \leq x_{\text{max}}\nonumber
+\end{align}
+    
+The issue of a MHE is the high effort that is needed to implement the observer. A good compromise is to use the Constrained Extended Kalman Filter (CEKF), which can be interpreted as a MHE with horizon length equal to zero.
+
+\begin{align}
+\label{eq:CEKF}
+\underset{\hat{\xi}_{k-1,k},\hat{\varphi}_{k,k}}{\text{min}} \quad \Psi^0_k &= \hat{\xi}_{k-1,k}^TP^{-1}_{k-1,k}\hat{\xi}_{k-1,k} + \hat{\varphi}_{k,k}^TR^{-1}\hat{\varphi}_{k,k}\\\nonumber
+\end{align}
+subject to
+\begin{align}
+\hat{x}_{k,k} &=  \hat{x}_{k,k-1} + \hat{\xi}_{k-1,k}\\\nonumber
+\hat{\varphi}_{k,k} &=  y_{k} - h(\hat{x}_{k,k}) \\\nonumber
+\xi_{\text{min}} &\leq  \hat{\xi}_{k-1|k} \leq \xi_{\text{max}} \\\nonumber
+\varphi_{\text{min}} &\leq  \hat{\varphi}_{k|k} \leq \varphi_{\text{max}} \\\nonumber
+x_{\text{min}} &\leq  \hat{x}_{k|k} \leq x_{\text{max}}\nonumber
+\end{align}    
+
+The CEKF is called a Kalman Filter as the Kalman Filter equations can be derived from it by neglecting the 				constraints and solving the optimization problem analytically.
+
+<strong> Particle Filter </strong>
+
+Particle Filter (PF) is another recursive sample based state estimation algorithm. The main differences with EKF is that the PF uses the full nonlinear model and no assumptions about the process and measurement noise are taken. In PF a set of $N$ particles is generated with a certain weight. The weight of each particle represents the probability density function of the estimates. Then the $N$ particles are propagated using the nonlinear model and the weights are updated according to some statistical rules (bayesian recursion). Then, any statistical measure of the a posteriori set can be computed. Usually the mean value is of interest because it gives the approximate optimal estimate of the state vector.
+
+<strong> Unscented Kalman Filter </strong>
+
+The Unscented Kalman Filter (UKF) addresses the approximation issues of the EKF. The state distribution is again represented by a Gaussian random variables, but is now specified using a minimal set of carefully chosen sample points. These sample points completely capture the true mean and covariance of the Gaussian random variables, and when propagated through the true nonlinear system, captures the posterior mean and covariance accurately to the 3rd order (Taylor series expansion)for any nonlinearity.
+
+<em>Remember that it is possible to achieve comparable results with each observer after some effort of tuning them.</em>

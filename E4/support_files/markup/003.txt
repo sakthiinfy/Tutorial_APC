@@ -1,0 +1,54 @@
+<strong> Fixed gain and gain scheduled observer </strong>
+
+<u> Advantages </u> 
+- Low effort for design 
+- Less computational time
+
+<u> Disadvantages </u>
+- Uses linearized model 
+- Difficult to tune 
+- Only valid around the operating point
+
+<strong>  Extended Kalman filter (EKF) </strong>
+
+<u> Advantages </u> 
+- Easy to design
+- Satisfactory performance if the system is not highly nonlinear
+- Tuning is difficult but better compared to Fixed gain and gain scheduled observer
+
+<u> Disadvantages </u>
+- Uses linearized model
+- Instability may occur
+
+<strong> Moving horizon estimation </strong>
+
+<u> Advantages </u> 
+- Solves an optimization problem
+- Uses full nonlinear model
+- Additional constraints can be added
+    
+<u> Disadvantages </u>
+- Numerically demanding
+- Requires tuning
+
+<strong> Particle filter   </strong>
+
+- Probability based technique
+
+<u> Advantages </u> 
+- No assumption on state and measurement noise 
+- Uses full nonlinear model
+
+<u> Disadvantages </u> 
+- High computational time  \newline
+- Tuning is difficult
+
+<strong>  Unscented Kalman filter </strong>
+
+<u> Advantages </u> 
+- Easy to design
+- Satisfactory performance when compared to EKF if the system is highly nonlinear
+- Tuning difficulty similar EKF
+
+<u> Disadvantages </u>
+- Instability may occur

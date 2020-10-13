@@ -1,0 +1,3 @@
+As mentioned above, the numerical method has a strong influence on the observer behavior. Therefore the performance can be improved by using higher order methods for numerical simulation than explicit Euler as they are implemented in MATLAB (e.g. <em>ode45</em>, based on Runge-Kutta of 4th order) or CasaDi (e.g. <em>Sundials</em>).
+
+Instead of discretizing the system, the continuous equations are implemented and solved between two sample times (they are solved numerically at discrete points by MATLAB). The state estimate and error covariance matrix are integerated together to obtain a priori estime. The measurements are used to correct the observed states before the system is simulated again for the next sampling point. 
